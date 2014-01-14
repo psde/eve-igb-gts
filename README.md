@@ -16,3 +16,8 @@ destination otherwise.
 Only works if you have GTS installed and the DLLs around and taught GTS about
 your jump bridge network etc. GTS doesn't have to be running, though. Listens
 on port 23455.
+
+How to compile (Windows)
+----
+In a Visual Studio commando prompt:
+` csc /t:exe /r:libGTS.dll /out:eve-igb.exe srv.cs
