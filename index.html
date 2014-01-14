@@ -10,9 +10,9 @@
   <body>  
 
   <div data-ng-controller="RouteController">
-    <form id="form">
+    <form id="form" ng-submit="findRoute()">
       <input data-ng-model="routeTo" type="text" size="12" name="destination" id="destination" placeholder="Destination">
-      <button data-ng-click="findRoute()">Find Route</button>
+      <button>Find Route</button>
     </form>
 
     <div class="output" data-ng-show="route">
