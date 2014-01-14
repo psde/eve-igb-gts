@@ -1,8 +1,8 @@
-var $headers = {};
+var headers = {};
 if (window.CCPEVE) {
     CCPEVE.requestTrust("http://localhost:23455");
 } else {
-  $headers = {"EVE_SOLARSYSTEMNAME": "VFK-IV", "EVE_SOLARSYSTEMID" : 30002904};
+  headers = {"EVE_SOLARSYSTEMNAME": "VFK-IV", "EVE_SOLARSYSTEMID" : 30002904};
 }
 
 var module = angular.module('eve-igb',[]);
@@ -32,7 +32,7 @@ module.controller('RouteController', function($scope, $timeout, $http) {
     }
 
     function requestRouteTo(destination) {
-        $http.get('/api/gate-route/' + $scope.routeTo, {headers: $headers})
+        $http.get('/api/gate-route/' + $scope.routeTo, {headers: headers})
             .success(function(data) {
                 setMessage("");
                 setRoute(data.route);
@@ -100,7 +100,7 @@ module.controller('RouteController', function($scope, $timeout, $http) {
 
     // This is needed because CCP sucks.
     function getCurrentSystem() {
-        $http.get('/api/systemid/', {headers: $headers}).success(function(data) {
+        $http.get('/api/systemid/', {headers: headers}).success(function(data) {
             var new_system = data.id
             if(current_system != new_system)
             {
