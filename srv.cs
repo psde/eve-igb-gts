@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.IO;
 using System.Text;
+using System.Linq;
 
 using libGTS.Data.Static;
 using libGTS.Data.Dynamic;
@@ -83,8 +84,8 @@ class Srv {
 
   static bool DeliverGateRoute(HttpListenerResponse response, string startSystem, string endSystem)
   {
-      var start = _LookupSystem(startSystem);
-      var end = _LookupSystem(endSystem);
+      var start = LookupSystem(startSystem);
+      var end = LookupSystem(endSystem);
       if (end == null)
           return false;
 

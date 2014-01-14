@@ -34,6 +34,7 @@ module.controller('RouteController', function($scope, $timeout, $http) {
     function requestRouteTo(destination) {
         $http.get('/api/gate-route/' + $scope.routeTo, {headers: $headers})
             .success(function(data) {
+                setMessage("");
                 setRoute(data.route);
             })
             .error(function(data) {
