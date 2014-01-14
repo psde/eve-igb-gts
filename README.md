@@ -20,4 +20,4 @@ on port 23455.
 How to compile (Windows)
 ----
 In a Visual Studio commando prompt:
-` csc /t:exe /r:libGTS.dll /out:eve-igb.exe srv.cs
+`csc /t:exe /r:libGTS.dll /out:eve-igb.exe srv.cs`
