@@ -1,0 +1,114 @@
+::selection {
+  background: #adadad;
+}
+
+body, input {
+  background-color: #222;
+  font-family: "EVE Sans Neue", sans-serif;
+  font-size: 10pt;
+}
+
+body {
+  color: #989898;
+}
+
+input {
+  color: #bfbfbf;
+  border: 1px solid black;
+}
+
+input:focus {
+  border: 1px solid #333;
+}
+
+button {
+  font-family: "EVE Sans Neue",sans-serif;
+  font-size: 10pt;
+  color: #9a9a9a;
+  background-image: -moz-linear-gradient(to bottom, black, #151515);
+  background: -webkit-gradient(linear, left top, left bottom, from(black), to(#151515));
+  border: 1px solid black;
+  border-bottom: 1px solid #353535;
+}
+
+button:hover {
+  border-color: #999;
+} 
+
+button:active {
+  border-color: white;
+  position: relative;
+  top: 1px;
+}
+
+form, .output > * {
+  background-color: black;
+  padding: 8px;
+  border: 1px solid #333;
+  border-radius: 2px;
+}
+
+.output {
+  margin-top: 8px;
+}
+
+.output ul {
+  padding: 0;
+  margin: 0;
+  display: block;
+}
+
+.output li {
+  list-style-type: none;
+  list-style-position: inside;
+  display: inline;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.unnamed-system {
+  font-family: monospace;
+}
+
+.system-name {
+  display: inline-block;
+}
+
+.output button, #total {
+  float: right;
+  margin: 0;
+  margin-left: 2em;
+}
+
+.output .pad {
+  font-size: 0;
+}
+
+.jump {
+  margin: 0px 4px;
+  font-style: oblique;
+}
+
+.jump:after {
+  margin-left: 4px;
+  width: 13px;
+  height: 11px;
+  padding: 0;
+  display: inline-block;
+  border: 0;
+}
+
+.destination .jump:after {
+  background-color: yellow;
+}
+
+.jump-jb:after {
+  background: white url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAMCAQAAAATvv9SAAAAAmJLR0QAAKqNIzIAAAAJcEhZcwAADk0AAA5NAUbVaAkAAAAHdElNRQfdCgYXBgar/1VqAAAAJWlUWHRDb21tZW50AAEAAAAImXMuSk0sSU1RKM8syVBw9/QNAAA3nQXiEzZwDQAAAK5JREFUGNNN0DFuwlAMBuBvoBN7t3AulInSk3SJ1J0LsCBRpBepXXMBTvCGro8hE5XnqmFIApUn+5N+2WaYqshTlWlyh4O1SmXtqIiZimzry9WPT68aZaalTpZkoUi2PsRI2dKv4m/KaNW6kcLZwpuYul5lP1NYeP9HK81IV0++FaHcA3cjPbsIWQhFtnGS5jU6L1q9XmujkZTHyUe1ykrtJDk/vjEInb3GTpINhhsRAXgiGiDapgAAAABJRU5ErkJggg==) no-repeat left top;
+  content: "";
+}
+
+.jump-gate:after {
+  background: white url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAMCAQAAAATvv9SAAAAAmJLR0QAAKqNIzIAAAAJcEhZcwAADk0AAA5NAUbVaAkAAAAHdElNRQfdCgYXBSK80eJ4AAAAJWlUWHRDb21tZW50AAEAAAAImXMuSk0sSU1RKM8syVBw9/QNAAA3nQXiEzZwDQAAALhJREFUGNNF0LFNw1AQBuAP9nDmYYTIlQlSMgMiUHqCLJAGKYl4lqBNkYLGE7wFrnEFej0yRaxYf3ef9OvuGKeEPCWmyQ3eLVUqSwehXCkU4dGXH78+PWmFkfDsqJclWRGSlaNC787a1lH4m8o7tfOVHqysvbgoRsWgsp9p49W3PNFCS+/expsPSRG3wh1hq7OX9YoiZI2TdF2+d9boDAadRiuJ+eSDWmWhdpL08zdGxdleayfJRuM/vfRvzuvCHXUAAAAASUVORK5CYII=) no-repeat left top;
+  content: "";
+}

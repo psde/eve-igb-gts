@@ -27,30 +27,107 @@ class Srv {
   }
 
   static void Handle(HttpListenerContext c) {
-    var req = c.Request;
-    var path = req.RawUrl;
-    var resp = c.Response;
-    using (resp) {
-      if (path.StartsWith("/to/")) {
-        var headers = req.Headers;
-        var end = path.Substring(4);
-        var start = headers["EVE_SOLARSYSTEMNAME"];
-        if (start == null) {
-          resp.StatusCode = (int) HttpStatusCode.BadRequest;
-        } else {
-          var route = GenerateRoute(start, end);
-          if (route == null) {
-            resp.StatusCode = (int) HttpStatusCode.BadRequest;
-          } else {
-            resp.ContentType = "text/plain";
-            RespondWith(resp, route);
-          }
+    var request = c.Request;
+    var path = request.RawUrl;
+    var headers = request.Headers;
+    var response = c.Response;
+    using (response)
+    {
+        if (path.StartsWith("/files/"))
+        {
+            var filename = path.Split('/').Last();
+            if (DeliverFile(response, filename) == false)
+            {
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
+            }
         }
-      } else {
-        resp.ContentType = "text/html;charset=utf-8";
-        RespondWith(resp, File.ReadAllBytes("index.html"));
-      }
+        else if (path.StartsWith("/api/systemid/"))
+        {
+            var id = headers["EVE_SOLARSYSTEMID"];
+            response.ContentType = "application/json";
+            RespondWith(response, "{ \"id\": \"" + id + "\"}");
+        }
+        else if (path.StartsWith("/api/gate-route/"))
+        {
+            var end = path.Split('/').Last();
+            var start = headers["EVE_SOLARSYSTEMNAME"];
+            if (DeliverGateRoute(response, start, end) == false)
+            {
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
+            }
+        }
+        else
+        {
+            DeliverFile(response);
+        }
     }
+  }
+
+  static bool DeliverFile(HttpListenerResponse response, string filename = "index.html")
+  {
+      var validFiles = new Dictionary<string, string>
+                        {
+                            {"index.html", "text/html;charset=utf-8"},
+                            {"style.css", "text/css;charset=utf-8"},
+                            {"app.js", "text/javascript;charset=utf-8"}
+                        };
+
+      if (validFiles.ContainsKey(filename))
+      {
+          response.ContentType = validFiles[filename];
+          RespondWith(response, File.ReadAllBytes(filename));
+          return true;
+      }
+      return false;
+  }
+
+  static bool DeliverGateRoute(HttpListenerResponse response, string startSystem, string endSystem)
+  {
+      var start = _LookupSystem(startSystem);
+      var end = _LookupSystem(endSystem);
+      if (end == null)
+          return false;
+
+      var routeParams = new GateRouteParameters();
+      routeParams.RoutingOption = GateRouteOption.UseBridges;
+      routeParams.ShipMass = 1f;
+
+      var router = new GateRouter(routeParams);
+      List<Vertex> path;
+      router.GetShortestPath(start, end, out path);
+
+      if (path.Count == 0)
+          return false;
+
+      response.ContentType = "text/plain";
+
+      var b = new StringBuilder();
+      b.Append("{\"route\": [\n");
+
+      foreach (var jump in path)
+      {
+          b.Append("{");
+
+          b.Append("\"name\":\"").Append(jump.SolarSystem.Name).Append("\",");
+          b.Append("\"id\":\"").Append(jump.SolarSystem.ID).Append("\",");
+          b.Append("\"type\":\"").Append(jump.JumpType).Append("\"");
+
+          if (jump.JumpType == JumpType.Bridge)
+          {
+              b.Append(",\"pos\":\"").Append(jump.Bridge.Pos.Planet).Append("-").Append(jump.Bridge.Pos.Moon).Append("\"");
+          }
+
+          b.Append("}");
+
+          if (jump != path[path.Count - 1])
+              b.Append(",\n");
+      }
+      b.Append("] }");
+
+      response.ContentType = "application/json";
+      RespondWith(response, b.ToString());
+
+      return true;
   }
 
   static void RespondWith(HttpListenerResponse resp, string text) {
