@@ -13,18 +13,17 @@
     <form id="form" ng-submit="findRoute()">
       <input data-ng-model="routeTo" type="text" size="12" name="destination" id="destination" placeholder="Destination">
       <button>Find Route</button>
+      <button data-ng-show="route || message" data-ng-click="clearRoute()" style="float: right;">Clear</button>
     </form>
 
     <div class="output" data-ng-show="route">
       <div id="result">
-        <button data-ng-click="clearRoute()">Clear</button>
         <p id="total" data-ng-show="route">Total jumps: {{ route.length - 1 }}</p>
         <ul>
           <li data-ng-repeat="jump in route" ng-class="{destination: jump.destination == true}">
 
             <span ng-if="jump.type == 'Gate' && $index != 0">
               <span class="jump jump-gate"></span>
-              <span class="pad">, </span>
             </span>
             <span ng-if="jump.type == 'Bridge'">
               <span class="jump jump-jb">(4-1)</span>
@@ -32,26 +31,12 @@
 
             <span class="system-name unnamed-system">{{ jump.name }}</span>
 
-<!--
-            <span class="system-name unnamed-system">{{ jump.name }}</span>
-
-
-            </li>
-            <li class="destination">
-            <span class="pad">, take jb at </span>
-            <span class="pad"> to </span>
-            <span class="system-name unnamed-system">6GWE-A</span>
-
-            <span>{{ jump.name }}</span>
-            <p>{{ jump.type }}</p>-->
-
           </li> 
         </ul>
       </div>
     </div>
 
     <div class="output" data-ng-show="message">
-      <button data-ng-click="clearRoute()">Clear</button>
       <div>{{ message }}</div>
     </div>
 
