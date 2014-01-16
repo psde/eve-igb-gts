@@ -6,7 +6,7 @@ if (window.CCPEVE) {
 }
 
 var module = angular.module('eve-igb',[]);
-module.service('EveIgbService', function($http, $timeout) {
+module.service('EveIgbService', function($http, $timeout, $rootScope) {
     var autopilot_destination = null;
 
     this.setAutopilotDestination = function(dest) {
@@ -23,9 +23,12 @@ module.service('EveIgbService', function($http, $timeout) {
         console.log("clearAutopilotDestination")
     }
 
-    var onSystemChangedListener = [];
-    this.addOnSystemChangedListener = function(func) {
-        onSystemChangedListener.push(func);
+    this.setMessage = function(msg) {
+        $rootScope.message = msg;
+    }
+
+    this.getCurrentSystem = function(){
+        return current_system;
     }
 
     function setCCPEVEDestination(dest) {
@@ -37,24 +40,18 @@ module.service('EveIgbService', function($http, $timeout) {
     var current_system = 0;
     function onSystemChanged(new_system) {
         current_system = new_system;
-        if(destination) {
-            for(var i in onSystemChanged) {
-                onSystemChangedListener[i](current_system);
-            }
-        }
         console.log("onSystemChanged: " + current_system)
     }
 
     // This is needed because CCP sucks.
     function getCurrentSystem() {
-        $http.get('/api/systemid/', {headers: headers}).success(function(data) {
+        $http.get('/api/info/', {headers: headers}).success(function(data) {
             var new_system = data.id
             if(current_system != new_system)
             {
                 onSystemChanged(new_system);
             }
         });
-
         $timeout(function() {
             getCurrentSystem();
         }, 5000);
@@ -63,6 +60,9 @@ module.service('EveIgbService', function($http, $timeout) {
 });
 
 module.controller('RouteController', function($scope, $timeout, $http, EveIgbService) {
+    $scope.current_system = 0;
+    $scope.route = [];
+
     var destination = null;
 
     //$scope.routeTo = "1dh";
@@ -73,65 +73,122 @@ module.controller('RouteController', function($scope, $timeout, $http, EveIgbSer
         requestRouteTo(destination);
     };
 
+    $scope.importRoute = function() {
+        destination = null;
+        importRoute();
+    };
+
     $scope.clearRoute = function() {
         clearRoute();
-        setMessage("");
+        EveIgbService.setMessage("");
     };
 
     function requestRouteTo(destination) {
-        $http.get('/api/gate-route/' + $scope.routeTo, {headers: headers})
+        console.log("requestRouteTo:" + destination)
+        requestRouteUrl('/api/gate-route/' + $scope.routeTo);
+    }
+
+    function importRoute() {
+        console.log("importRoute")
+        requestRouteUrl('/api/gts-route/');
+    }
+
+    function requestRouteUrl(url) {
+        $http.get(url, {headers: headers})
             .success(function(data) {
-                setMessage("");
-                setRoute(data.route);
+                EveIgbService.setMessage("");
+                setRoute(data);
             })
             .error(function(data) {
                 // No route found?
                 if(data == null || data.route == null || data.route.length == 0)
                 {
                     clearRoute();
-                    setMessage("No route found.");
+                    EveIgbService.setMessage("No route found.");
                     return;
                 }
             });
     }
 
-    function setRoute(route) {
+    function setRoute(data) {
+        var route = data.route;
+        var isJumpRoute = data.isJumpRoute == "True";
+
         // Are we there yet?
         if(route.length == 1 && current_system == route[0].id) {
             clearRoute();
-            setMessage("Destination reached");
+            EveIgbService.setMessage("Destination reached");
             return;
         }
 
-        // Determine next destination
-        var destination = route.length - 1;
-        for (var i = 0; i < route.length; i++) {
-            element = route[i];
+        $scope.route = route;
+        $scope.fuelcost = data.fuel;
 
-            if(element.type == "Bridge") {
-                destination = i;
-                break;
+        setNextDestination();
+    }
+
+    function setNextDestination() {
+        var route = $scope.route;
+        if(destination != null) {
+            // Determine next destination
+            var dest = route.length - 1;
+            for (var i = 0; i < route.length; i++) {
+                element = route[i];
+
+                if(element.type != "Gate") {
+                    dest = i;
+                    break;
+                }
+            }
+            route[dest].destination = true;
+
+            EveIgbService.setAutopilotDestination(route[dest - 1].id);
+        } else if(route.length > 0){
+            // Imported route, check if current system on route and set next destination
+            var currenySystemIndex = -1;
+            for (var i = 0; i < route.length; i++) { 
+                route[i].destination = false;
+                if(route[i].id == EveIgbService.getCurrentSystem()) {
+                    currenySystemIndex = i;
+                }
+            }
+
+            if(currenySystemIndex == -1)
+            {
+                route[0].destination = true;
+                EveIgbService.setAutopilotDestination(route[0].id);
+            }else{
+                var dest = route.length - 1;
+                for (var i = currenySystemIndex; i < route.length; i++) {
+                    element = route[i];
+
+                    if(element.type != "Gate") {
+                        dest = i;
+                        break;
+                    }
+                }
+                route[dest].destination = true;
+                EveIgbService.setAutopilotDestination(route[dest - 1].id);
             }
         }
-        route[destination].destination = true;
-
-        EveIgbService.setAutopilotDestination(route[destination - 1].id);
         $scope.route = route;
     }
 
-    EveIgbService.addOnSystemChangedListener(function (sys) {
-        if(destination) {
+    $scope.$watch(EveIgbService.getCurrentSystem, function (sys) {
+        $scope.current_system = sys;
+        if(destination != null) {
+            // Reroute player
             requestRouteTo(destination);
+        } else {
+            setNextDestination();
         }
     });
 
     function clearRoute() {
         destination = null;
         $scope.route = null;
+        $scope.fuelcost = 0;
         EveIgbService.clearAutopilotDestination();
-    }
-
-    function setMessage(msg) {
-        $scope.message = msg;
+        console.log("clearRoute()")
     }
 });

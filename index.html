@@ -4,42 +4,48 @@
     <title>GTS Gate/JB Route Finder</title>
     <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
     <link rel="stylesheet" type="text/css" href="http://localhost:23455/files/style.css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular-animate.min.js"></script>
     <script src="http://localhost:23455/files/app.js"></script>
   </head>
   <body>  
 
   <div data-ng-controller="RouteController">
-    <form id="form" ng-submit="findRoute()">
-      <input data-ng-model="routeTo" type="text" size="12" name="destination" id="destination" placeholder="Destination">
-      <button>Find Route</button>
-      <button data-ng-show="route || message" data-ng-click="clearRoute()" style="float: right;">Clear</button>
-    </form>
+    <div class="box">
+      <button class="right" data-ng-show="route || message" data-ng-click="clearRoute()">Clear</button>
+      <form ng-submit="findRoute()">
+        <input data-ng-model="routeTo" type="text" size="12" name="destination" id="destination" placeholder="Destination">
+        <button>Find Route</button>
+      </form>
+      <button data-ng-click="importRoute()">Import from GTS</button>
+    </div>
 
-    <div class="output" data-ng-show="route">
+    <div class="box" data-ng-show="route">
       <div id="result">
-        <p id="total" data-ng-show="route">Total jumps: {{ route.length - 1 }}</p>
+        <p class="right" data-ng-show="route">Total jumps: {{ route.length - 1 }}</p>
+        <p class="right" data-ng-show="fuelcost > 0">Fuel cost: {{ fuelcost }} LO</p>
         <ul>
           <li data-ng-repeat="jump in route" ng-class="{destination: jump.destination == true}">
 
-            <span ng-if="jump.type == 'Gate' && $index != 0">
-              <span class="jump jump-gate"></span>
-            </span>
-            <span ng-if="jump.type == 'Bridge'">
-              <span class="jump jump-jb">(4-1)</span>
+            <span ng-if="$index != 0 || jump.destination == true">
+              <span ng-if="jump.type == 'Gate'" class="jump jump-gate" title="Gate to {{ jump.name }}"></span>
+              <span ng-if="jump.type == 'Bridge'" class="jump jump-bridge" title="Jumpbridge in {{ route[$index-1].name || jump.name }} at {{ jump.pos }}">({{ jump.pos }})</span>
+              <span ng-if="jump.type == 'Beacon'" class="jump jump-beacon" title="Cyno Beacon"></span>
+              <span ng-if="jump.type == 'Station'" class="jump jump-station" title="Station Cyno"></span>
+              <span ng-if="jump.type == 'Cyno'" class="jump jump-cyno" title="Cyno"></span>
             </span>
 
-            <span class="system-name unnamed-system">{{ jump.name }}</span>
+            <span class="system-name" ng-class="{selected: jump.id == current_system}">{{ jump.name }}</span>
 
           </li> 
         </ul>
       </div>
     </div>
+  </div>
 
-    <div class="output" data-ng-show="message">
-      <div>{{ message }}</div>
-    </div>
-
+  <div class="box" data-ng-show="message">
+    <div>{{ message }}</div>
   </div>
 
   </body>
